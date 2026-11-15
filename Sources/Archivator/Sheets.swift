@@ -162,7 +162,7 @@ struct AddSheet: View {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { error = "Укажите имя архива"; return }
         guard password == password2 else { error = "Пароли не совпадают"; return }
-        if format == .rar && !rarAvailable { error = "Для RAR установите утилиту: brew install rar"; return }
+        if format == .rar && !rarAvailable { error = "Для RAR нужна утилита rar. " + ArchiveEngine.rarInstallHint; return }
         onOK(AddOptions(archive: URL(fileURLWithPath: (trimmed as NSString).expandingTildeInPath),
                         files: files, format: format, level: level,
                         password: password.isEmpty ? nil : password,

@@ -68,6 +68,9 @@ enum ArchiveEngine {
         dirs.append(exeDir)
         dirs.append(URL(fileURLWithPath: fm.currentDirectoryPath).appendingPathComponent("bin"))
         dirs += searchDirs.map { URL(fileURLWithPath: $0) }
+        // личные папки пользователя: сюда можно положить rar без прав администратора
+        let home = fm.homeDirectoryForCurrentUser
+        dirs += [home.appendingPathComponent("bin"), home.appendingPathComponent(".local/bin")]
         dirs += (ProcessInfo.processInfo.environment["PATH"] ?? "").split(separator: ":").map { URL(fileURLWithPath: String($0)) }
         for name in names {
             for d in dirs {
@@ -77,6 +80,8 @@ enum ArchiveEngine {
         }
         return nil
     }
+
+    static let rarInstallHint = "Скачайте «RAR for macOS ARM» с rarlab.com/download.htm и положите файл rar в папку ~/bin, затем перезапустите Archivator."
 
     static let sevenZip: URL? = findTool(["7zz", "7z"])
     static let rar: URL? = findTool(["rar"])
@@ -290,7 +295,7 @@ enum ArchiveEngine {
 
         if o.format == .rar {
             guard let rar else {
-                throw ArchiveError(message: "Для создания RAR нужна утилита rar от RARLAB.\nУстановите: brew install rar\n(распаковка RAR работает и без неё)")
+                throw ArchiveError(message: "Для создания RAR нужна утилита rar от RARLAB.\n\(rarInstallHint)\n(распаковка RAR работает и без неё)")
             }
             var args = ["a", "-y", "-m\(o.level.rarLevel)", "-ep1", "-r"]
             if let password { args.append(o.encryptNames ? "-hp\(password)" : "-p\(password)") }
@@ -320,7 +325,7 @@ enum ArchiveEngine {
 
     static func delete(from archive: URL, files: [String], type: String, password: String?) async throws {
         if type.lowercased().contains("rar") || archive.pathExtension.lowercased() == "rar" {
-            guard let rar else { throw ArchiveError(message: "Удаление из RAR требует утилиту rar (brew install rar)") }
+            guard let rar else { throw ArchiveError(message: "Удаление из RAR требует утилиту rar.\n\(rarInstallHint)") }
             let r = try await run(rar, ["d", "-y"] + pw(password) + ["--", archive.path] + files)
             if r.code != 0 { throw failure(r, "Ошибка удаления") }
             return
