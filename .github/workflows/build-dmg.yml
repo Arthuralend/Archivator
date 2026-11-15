@@ -1,0 +1,38 @@
+name: Build DMG
+
+on:
+  push:
+    branches: [main, master, claude/focused-curie-nunu1m]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14   # Apple Silicon
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Swift version
+        run: swift --version
+
+      - name: Build app and DMG
+        run: ./scripts/build-app.sh --dmg
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Archivator-dmg
+          path: build/Archivator.dmg
+
+      - name: Publish release "latest"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest build/Archivator.dmg \
+            --title "Archivator — последняя сборка" \
+            --notes "Автоматическая сборка из ${GITHUB_REF_NAME} (${GITHUB_SHA::7}). Приложение не подписано: при первом запуске — правый клик → «Открыть»." \
+            --target "$GITHUB_SHA" \
+            --prerelease
