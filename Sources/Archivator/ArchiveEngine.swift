@@ -104,6 +104,8 @@ enum ArchiveEngine {
             p.arguments = args
             if let cwd { p.currentDirectoryURL = cwd }
             p.standardInput = FileHandle.nullDevice
+            // Пользователь ждёт результата: macOS отдаёт приоритет производительным ядрам
+            p.qualityOfService = .userInitiated
             let out = Pipe(), err = Pipe()
             p.standardOutput = out
             p.standardError = err
@@ -297,7 +299,9 @@ enum ArchiveEngine {
             guard let rar else {
                 throw ArchiveError(message: "Для создания RAR нужна утилита rar от RARLAB.\n\(rarInstallHint)\n(распаковка RAR работает и без неё)")
             }
-            var args = ["a", "-y", "-m\(o.level.rarLevel)", "-ep1", "-r"]
+            // rar по умолчанию использует все ядра; -mt задаём явно
+            var args = ["a", "-y", "-m\(o.level.rarLevel)", "-ep1", "-r",
+                        "-mt\(min(ProcessInfo.processInfo.activeProcessorCount, 64))"]
             if let password { args.append(o.encryptNames ? "-hp\(password)" : "-p\(password)") }
             if o.solid { args.append("-s") }
             if o.deleteAfter { args.append("-df") }
@@ -309,7 +313,8 @@ enum ArchiveEngine {
         }
 
         let bin = try requireSevenZip()
-        var args = ["a", "-bsp1", "-sccUTF-8", "-y", "-t\(o.format.rawValue)", "-mx=\(o.level.sevenZipLevel)"]
+        // -mmt=on: все ядра (LZMA2 в 7Z — параллельно внутри данных, Deflate в ZIP — по файлам)
+        var args = ["a", "-bsp1", "-sccUTF-8", "-y", "-t\(o.format.rawValue)", "-mx=\(o.level.sevenZipLevel)", "-mmt=on"]
         if let password {
             args.append("-p\(password)")
             if o.format == .sevenZ && o.encryptNames { args.append("-mhe=on") }
