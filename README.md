@@ -27,7 +27,7 @@ Homebrew с 01.09.2026 больше не устанавливает `rar` (не 
 1. Скачайте «RAR for macOS ARM» с https://www.rarlab.com/download.htm
 2. В Терминале:
    ```bash
-   cd ~/Downloads && tar -xzf rarmacos-arm-*.tar.gz
+   cd ~/Downloads && tar -xf rarmacos-*.tar*   # Safari может сам снять .gz
    mkdir -p ~/bin && cp rar/rar ~/bin/ && xattr -c ~/bin/rar
    ```
 3. Перезапустите Archivator. Он ищет `rar` в `~/bin`, `/opt/homebrew/bin`, `/usr/local/bin`.
