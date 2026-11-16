@@ -23,16 +23,16 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Archivator-dmg
-          path: build/Archivator.dmg
+          name: ZIPStudio-dmg
+          path: build/ZIPStudio.dmg
 
       - name: Publish release "latest"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest build/Archivator.dmg \
-            --title "Archivator — последняя сборка" \
+          gh release create latest build/ZIPStudio.dmg \
+            --title "ZIP Studio — последняя сборка" \
             --notes "Автоматическая сборка из ${GITHUB_REF_NAME} (${GITHUB_SHA::7}). Приложение не подписано: при первом запуске — правый клик → «Открыть»." \
             --target "$GITHUB_SHA" \
             --prerelease

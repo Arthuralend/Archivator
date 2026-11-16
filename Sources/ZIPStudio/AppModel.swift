@@ -505,7 +505,7 @@ final class AppModel: ObservableObject {
         }
         do {
             let tmp = FileManager.default.temporaryDirectory
-                .appendingPathComponent("Archivator-\(UUID().uuidString.prefix(8))")
+                .appendingPathComponent("ZIPStudio-\(UUID().uuidString.prefix(8))")
             let pw = try await runOp("Просмотр", row.name) { h, p in
                 try await self.withPassword(a.url, initial: a.password) { pw in
                     try await ArchiveEngine.extract(a.url, to: tmp, files: [row.target], password: pw,

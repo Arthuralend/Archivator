@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "Archivator",
+    name: "ZIPStudio",
     platforms: [.macOS(.v13)],
     targets: [
         .executableTarget(
-            name: "Archivator",
-            path: "Sources/Archivator"
+            name: "ZIPStudio",
+            path: "Sources/ZIPStudio"
         )
     ]
 )

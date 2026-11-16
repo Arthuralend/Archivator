@@ -15,7 +15,7 @@ struct ContentView: View {
             if !model.sevenZipAvailable {
                 HStack {
                     Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.yellow)
-                    Text("Не найден 7-Zip. Установите его командой «brew install sevenzip» или соберите приложение скриптом scripts/build-app.sh.")
+                    Text("Не найден 7-Zip. Установите его командой «brew install sevenzip» или скачайте готовую сборку ZIP Studio.")
                     Spacer()
                 }
                 .padding(.horizontal, 10).padding(.vertical, 5)
@@ -25,7 +25,7 @@ struct ContentView: View {
                 .overlay {
                     if dragOver {
                         RoundedRectangle(cornerRadius: 6)
-                            .strokeBorder(Color.accentColor, style: StrokeStyle(lineWidth: 2, dash: [6]))
+                            .strokeBorder(Theme.accent, style: StrokeStyle(lineWidth: 2, dash: [6]))
                             .padding(4)
                             .allowsHitTesting(false)
                     }
@@ -42,6 +42,8 @@ struct ContentView: View {
             StatusBar(model: model)
         }
         .frame(minWidth: 760, minHeight: 420)
+        .background(Theme.window)
+        .tint(Theme.accent)
         .navigationTitle(model.archive.map { $0.url.lastPathComponent } ?? model.fsDir.lastPathComponent)
         .overlay {
             if let p = model.progress { ProgressPanel(state: p) }
@@ -90,39 +92,38 @@ struct ToolbarStrip: View {
     var body: some View {
         HStack(spacing: 2) {
             ToolButton(title: "Добавить", help: "Добавить файлы в архив") {
-                AppIconBadge()
+                ToolIcon(name: "add", fallback: "plus.rectangle.on.folder.fill")
             } action: { model.cmdAdd() }
             ToolButton(title: "Извлечь…", help: "Извлечь в указанную папку") {
-                BadgeIcon(base: "folder.fill", baseColor: .yellow, badge: "arrow.down.circle.fill", badgeColor: .blue)
+                ToolIcon(name: "extract", fallback: "folder.fill")
             } action: { model.cmdExtract() }
             ToolButton(title: "Тест", help: "Проверить архив") {
-                BadgeIcon(base: "doc.text", baseColor: .gray, badge: "checkmark.circle.fill", badgeColor: .green)
+                ToolIcon(name: "test", fallback: "checkmark.seal.fill")
             } action: { model.cmdTest() }
             ToolButton(title: "Просмотр", help: "Открыть файл из архива") {
-                BadgeIcon(base: "doc.text", baseColor: .gray, badge: "magnifyingglass.circle.fill", badgeColor: .indigo)
+                ToolIcon(name: "view", fallback: "eye.fill")
             } action: { model.cmdView() }
             ToolButton(title: "Удалить", help: "Удалить выделенное", disabled: model.selectedRows.isEmpty) {
-                BadgeIcon(base: "doc.text", baseColor: .gray, badge: "xmark.circle.fill", badgeColor: .red)
+                ToolIcon(name: "delete", fallback: "trash.fill")
             } action: { model.cmdDelete() }
 
-            Divider().frame(height: 44).padding(.horizontal, 6)
+            Divider().frame(height: 48).padding(.horizontal, 6)
 
             ToolButton(title: "Найти", help: "Поиск файлов") {
-                BadgeIcon(base: "binoculars.fill", baseColor: Color(white: 0.3), badge: nil, badgeColor: .clear)
+                ToolIcon(name: "find", fallback: "binoculars.fill")
             } action: { model.showFind.toggle() }
             ToolButton(title: "Мастер", help: "Пошаговый мастер: упаковать или распаковать") {
-                BadgeIcon(base: "wand.and.stars", baseColor: .purple, badge: nil, badgeColor: .clear)
+                ToolIcon(name: "wizard", fallback: "wand.and.stars")
             } action: { model.cmdWizard() }
             ToolButton(title: "Инфо", help: "Информация об архиве") {
-                BadgeIcon(base: "info.circle.fill", baseColor: .blue, badge: nil, badgeColor: .clear)
+                ToolIcon(name: "info", fallback: "info.circle.fill")
             } action: { model.cmdInfo() }
             Spacer()
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 5)
+        .padding(.vertical, 6)
         .background(
-            LinearGradient(colors: [Color(nsColor: .controlBackgroundColor), Color(nsColor: .windowBackgroundColor)],
-                           startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Theme.toolbarTop, Theme.window], startPoint: .top, endPoint: .bottom)
         )
     }
 }
@@ -137,20 +138,20 @@ struct ToolButton<Icon: View>: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 3) {
-                icon().frame(width: 36, height: 36)
-                Text(title).font(.system(size: 11))
+            VStack(spacing: 4) {
+                icon().frame(width: 38, height: 38)
+                Text(title).font(.system(size: 11, weight: .medium))
             }
-            .frame(minWidth: 64)
-            .padding(.vertical, 4)
+            .frame(minWidth: 66)
+            .padding(.vertical, 5)
             .padding(.horizontal, 6)
             .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(hover && !disabled ? Color.accentColor.opacity(0.12) : Color.clear)
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(hover && !disabled ? Theme.accent.opacity(0.14) : Color.clear)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(hover && !disabled ? Color.accentColor.opacity(0.45) : Color.clear)
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(hover && !disabled ? Theme.accent.opacity(0.5) : Color.clear)
             )
             .contentShape(Rectangle())
         }
@@ -159,49 +160,6 @@ struct ToolButton<Icon: View>: View {
         .opacity(disabled ? 0.4 : 1)
         .onHover { hover = $0 }
         .help(help.isEmpty ? title : help)
-    }
-}
-
-/// SF Symbol с цветным значком в правом нижнем углу
-struct BadgeIcon: View {
-    let base: String
-    let baseColor: Color
-    let badge: String?
-    let badgeColor: Color
-
-    var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            Image(systemName: base)
-                .font(.system(size: 27))
-                .foregroundStyle(baseColor)
-                .frame(width: 36, height: 36)
-            if let badge {
-                Image(systemName: badge)
-                    .font(.system(size: 15, weight: .bold))
-                    .symbolRenderingMode(.palette)
-                    .foregroundStyle(.white, badgeColor)
-                    .background(Circle().fill(.white).padding(1))
-                    .offset(x: 3, y: 2)
-            }
-        }
-    }
-}
-
-/// Иконка приложения (стопка книг) с зелёным «+»
-struct AppIconBadge: View {
-    var body: some View {
-        ZStack(alignment: .topTrailing) {
-            Image(nsImage: NSApp.applicationIconImage)
-                .resizable()
-                .interpolation(.high)
-                .frame(width: 34, height: 34)
-            Image(systemName: "plus.circle.fill")
-                .font(.system(size: 15, weight: .bold))
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(.white, .green)
-                .background(Circle().fill(.white).padding(1))
-                .offset(x: 4, y: -3)
-        }
     }
 }
 
@@ -216,7 +174,7 @@ struct AddressBar: View {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.system(size: 20))
                     .symbolRenderingMode(.palette)
-                    .foregroundStyle(.white, Color.accentColor)
+                    .foregroundStyle(.white, Theme.accent)
             }
             .buttonStyle(.plain)
             .help("На уровень вверх (⌘↑)")
@@ -239,8 +197,8 @@ struct AddressBar: View {
             }
             .padding(.horizontal, 6)
             .frame(height: 24)
-            .background(Color(nsColor: .textBackgroundColor))
-            .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: .separatorColor)))
+            .background(Theme.surface)
+            .overlay(RoundedRectangle(cornerRadius: 5).stroke(Theme.border))
             .clipShape(RoundedRectangle(cornerRadius: 4))
         }
         .padding(.horizontal, 8)
@@ -313,6 +271,8 @@ struct FileTable: View {
             }
             .width(min: 60, ideal: 80)
         }
+        .scrollContentBackground(.hidden)
+        .background(Theme.surface)
         .contextMenu(forSelectionType: Row.ID.self) { ids in
             if !ids.isEmpty {
                 Button("Открыть") {
@@ -352,7 +312,7 @@ struct NameCell: View {
         HStack(spacing: 6) {
             if row.isUp {
                 Image(systemName: "arrow.turn.left.up")
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(Theme.accent)
                     .frame(width: 16, height: 16)
             } else {
                 Image(nsImage: IconCache.icon(for: row, archiveMode: archiveMode))
@@ -440,7 +400,7 @@ struct StatusPanel<Content: View>: View {
         HStack(spacing: 4) { content() }
             .padding(.horizontal, 6)
             .frame(height: 20)
-            .overlay(RoundedRectangle(cornerRadius: 3).stroke(Color(nsColor: .separatorColor)))
+            .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.border))
     }
 }
 

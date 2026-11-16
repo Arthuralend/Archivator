@@ -81,7 +81,7 @@ enum ArchiveEngine {
         return nil
     }
 
-    static let rarInstallHint = "Скачайте «RAR for macOS ARM» с rarlab.com/download.htm и положите файл rar в папку ~/bin, затем перезапустите Archivator."
+    static let rarInstallHint = "Скачайте «RAR for macOS ARM» с rarlab.com/download.htm и положите файл rar в папку ~/bin, затем перезапустите ZIP Studio."
 
     static let sevenZip: URL? = findTool(["7zz", "7z"])
     static let rar: URL? = findTool(["rar"])

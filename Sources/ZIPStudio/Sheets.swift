@@ -52,7 +52,7 @@ struct AddSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 36, height: 36)
+                ToolIcon(name: "add", fallback: "plus.rectangle.on.folder.fill")
                 Text("Имя и параметры архива").font(.title3.bold())
             }
             TabView {
@@ -192,7 +192,7 @@ struct ExtractSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                BadgeIcon(base: "folder.fill", baseColor: .yellow, badge: "arrow.down.circle.fill", badgeColor: .blue)
+                ToolIcon(name: "extract", fallback: "folder.fill")
                 Text("Путь и параметры извлечения").font(.title3.bold())
             }
             Text("Путь для извлечения (будет создан, если не существует)")
@@ -262,7 +262,7 @@ struct PasswordSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                Image(systemName: "lock.fill").font(.system(size: 26)).foregroundStyle(.orange)
+                Image(systemName: "lock.fill").font(.system(size: 26)).foregroundStyle(Theme.accent)
                 VStack(alignment: .leading) {
                     Text("Ввод пароля").font(.title3.bold())
                     Text("Архив «\(archiveName)» зашифрован").foregroundStyle(.secondary)

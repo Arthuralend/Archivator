@@ -2,12 +2,12 @@ import AppKit
 import SwiftUI
 
 @main
-struct ArchivatorApp: App {
+struct ZIPStudioApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @StateObject private var model = AppModel.shared
 
     var body: some Scene {
-        Window("Archivator", id: "main") {
+        Window("ZIP Studio", id: "main") {
             ContentView(model: model)
         }
         .defaultSize(width: 1000, height: 640)
